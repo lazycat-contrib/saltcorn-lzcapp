@@ -1,0 +1,60 @@
+application:
+  subdomain: saltcorn
+  multi_instance: false
+  # Saltcorn ships its own account system (first-run "create first user"
+  # wizard, email used only as the login name, no mail delivery required),
+  # so it is exposed directly and authenticates itself.
+  public_path:
+    - /
+  upstreams:
+    - location: /
+      backend: http://saltcorn:3000/
+services:
+  saltcorn:
+    # upstream: docker.io/saltcorn/saltcorn:1.6.4
+    image: docker.1ms.run/saltcorn/saltcorn:1.6.4
+    command:
+      - serve
+    environment:
+      - SALTCORN_SESSION_SECRET={{ printf "%x" (stable_secret "saltcorn_session") }}
+      - SALTCORN_DISABLE_UPGRADE=true
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=saltcorn
+      - PGPASSWORD={{ printf "%x" (stable_secret "saltcorn_pg") }}
+      - PGDATABASE=saltcorn
+      - NODE_ENV=production
+    binds:
+      - /lzcapp/var/data:/root/.local/share/saltcorn
+      - /lzcapp/var/config:/root/.config/saltcorn
+    depends_on:
+      - postgres
+  postgres:
+    # upstream: docker.io/library/postgres:16.15-alpine
+    image: docker.1ms.run/library/postgres:16.15-alpine
+    environment:
+      - POSTGRES_DB=saltcorn
+      - POSTGRES_USER=saltcorn
+      - POSTGRES_PASSWORD={{ printf "%x" (stable_secret "saltcorn_pg") }}
+    binds:
+      - /lzcapp/var/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "saltcorn"]
+      interval: 10s
+      start_period: 30s
+usage: |-
+  Saltcorn 是自托管的零代码应用构建器：在浏览器里拖拽搭建数据库应用、表单、
+  列表视图与仪表盘，不需要写代码。内置 PostgreSQL 容器，数据随应用持久化。
+
+  首次使用：
+    - 打开后会自动跳到「创建第一个用户」页面，填邮箱 + 密码即可，
+      该账号就是管理员。邮箱只作为登录名，不需要能收信，不发验证邮件。
+    - 系统没有内置账号，也没有默认口令。
+
+  说明：
+    - 应用自带注册与登录页，直接对外开放由 Saltcorn 自己的账号体系鉴权，
+      所以使用 public_path；建好管理员后请及时在后台关闭自助注册。
+    - 数据库在 /lzcapp/var/postgres，上传文件在 /lzcapp/var/data/files，
+      配置在 /lzcapp/var/config，卸载前请先备份。
+    - 数据库与文件目录不做跨大版本直接替换。
+    - 未做实机验证。

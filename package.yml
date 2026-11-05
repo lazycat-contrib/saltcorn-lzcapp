@@ -1,0 +1,17 @@
+package: community.lazycat.app.saltcorn
+name: Saltcorn
+description: "Saltcorn is a self-hosted, drag-and-drop app builder: build database apps, forms and dashboards from the browser, no code required."
+version: 0.0.0
+min_os_version: "1.5.0"
+homepage: https://github.com/saltcorn/saltcorn
+author: saltcorn
+license: MIT
+permissions:
+  required: []
+locales:
+  zh:
+    name: Saltcorn
+    description: "自托管零代码应用构建器：在浏览器里拖拽搭建数据库应用、表单与仪表盘。"
+  en:
+    name: Saltcorn
+    description: "Self-hosted no-code app builder: build database apps, forms and dashboards from the browser."

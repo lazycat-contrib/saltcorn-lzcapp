@@ -1,0 +1,56 @@
+version: 1
+
+project:
+  root: .
+  build_config: lzc-build.yml
+  package_file: package.yml
+  output: dist/application.lpk
+  target_arch: amd64
+
+update:
+  strategy: publish
+  allow_downgrade: false
+  version_source:
+    type: image
+    image: saltcorn
+
+build:
+  toolchains: []
+  run_buildscript: false
+
+images:
+  - id: saltcorn
+    target: service
+    service: saltcorn
+    source: docker.io/saltcorn/saltcorn
+    channel: stable
+    sort: semver
+    tag_regex: '^v?[0-9]+[.][0-9]+[.][0-9]+$'
+    delivery:
+      mode: mirror
+      require_digest_match: true
+  - id: postgres
+    target: service
+    service: postgres
+    source: docker.io/library/postgres
+    channel: custom
+    sort: semver
+    tag_regex: '^16[.][0-9]+-alpine$'
+    version_regex: '^(?P<version>16[.][0-9]+)-alpine$'
+    version_template: '{version}.0'
+    delivery:
+      mode: mirror
+      require_digest_match: true
+
+release:
+  use_github_release_notes: true
+  store_changelog_format: plain
+
+stores:
+  official:
+    enabled: false
+  private:
+    enabled: true
+    skip_if_version_exists: true
+    name: Saltcorn
+    summary: "Saltcorn 懒猫微服打包：零代码应用构建器，内置 PostgreSQL，浏览器里拖拽搭建业务系统。"
