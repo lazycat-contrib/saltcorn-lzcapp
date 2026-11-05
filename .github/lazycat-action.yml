@@ -50,7 +50,7 @@ stores:
   official:
     enabled: false
   private:
-    enabled: true
+    enabled: false
     skip_if_version_exists: true
     name: Saltcorn
     summary: "Saltcorn 懒猫微服打包：零代码应用构建器，内置 PostgreSQL，浏览器里拖拽搭建业务系统。"
